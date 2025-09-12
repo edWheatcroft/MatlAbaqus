@@ -1,4 +1,4 @@
-# MatlabAqus
+# MatlAbaqus
 A collection of MATLAB scripts for interacting with ABAQUS. 
 
 Currently includes (see individual files for further information):
