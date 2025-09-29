@@ -31,8 +31,8 @@ function [stepSummary, EVsummary, stabSummary] = readMSG(fileName, filePath, pri
 % stabSummary    cell array      Cell is #steps x 1. As per EVsummary, except each array entry is 1 if there are zero negative EVs, and 2 otherwise.
 
 arguments
-    fileName string
-    filePath string
+    fileName char
+    filePath char
     printFlag logical = false
 end
 
