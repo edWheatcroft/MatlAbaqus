@@ -11,7 +11,7 @@ Currently includes (see individual files for further information):
 ## Getting Started
 
 - Either clone or download the repository.
-- Add the folder tbx to the MATLAB path.
+- Add the repository's folder to the MATLAB path.
 - Install the abYthon package using pip.
 
 ### Prerequisites
