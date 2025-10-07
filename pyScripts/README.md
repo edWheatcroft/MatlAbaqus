@@ -6,6 +6,7 @@ The code is structured into a python package called abYthon, which you should be
 
 The general structure of the package is:
 py2/                            Code which only Abaqus' native Python compiler (Python 2.7.15 in Abaqus 2023) can handle safely.
+    logToFile_.py               A function which forces Abaqus to send python shell output (e.g. print()) to a file of the user's choice.
     handlers/                   A module for conducting basic operations with Abaqus objects (run jobs, read output etc.)
             __init__.py
             job_.py
