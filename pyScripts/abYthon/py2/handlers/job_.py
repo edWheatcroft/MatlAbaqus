@@ -5,6 +5,8 @@ Can be run with or without the Abaqus kernel.
 
 
 import os
+import shutil
+import stat
 from abaqusConstants import *
 
 class job:
@@ -28,6 +30,9 @@ class job:
 
 
     def run(self, makeBat=True):
+
+        # make the bin folder if it doesn't exist
+        self.makeBinFolder()
         
         # write the iput file
         self.writeINP()
@@ -109,5 +114,29 @@ class job:
             print("BAT file written to: {}".format(batPath))
         except IOError as e:
             print("Failed to write BAT file: {}".format(e))
-            
 
+
+    def makeBinFolder(self):
+        '''
+        Make the bin folder if it doesn't exist using vintage python syntax.
+        Also deletes the existing folder and its contents if it already exists.
+        '''
+
+        binAbsPath = os.path.abspath(self.binFolder)
+
+        # delete the existing folder and its contents if it already exists
+        if os.path.exists(binAbsPath):
+            if self.debug:
+                print("Deleting existing bin folder: {}".format(binAbsPath))
+            shutil.rmtree(binAbsPath, onerror=self.remove_readonly)
+        
+
+        os.makedirs(binAbsPath)
+
+
+    def remove_readonly(self, func, path, excinfo):
+        # func = the function that raised the exception (os.remove, os.rmdir)
+        # path = the path it tried to delete
+        # excinfo = exception info
+        os.chmod(path, stat.S_IWRITE)  # make writable
+        func(path)  # retry
