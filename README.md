@@ -13,7 +13,7 @@ Currently includes (see individual files for further information):
 - Either clone or download the repository.
 - Add the repository's folder to the MATLAB path.
 - Install the abYthon package to YOUR OWN python install using pip.
-- If you want to access abYthon.py2 directly from within ABAQUS python, either add its path in your script, or copy the py2 folder to ABQAQUS' lib directory (somewhere like C:\SIMULIA\EstProducts\2023\win_b64\code\python2.7\lib)
+- If you want to access abYthon.py2 directly from within ABAQUS python, either add its path in your script, or copy the py2 folder to ABQAQUS' lib directory (somewhere like C:\SIMULIA\EstProducts\2023\win_b64\code\python2.7\lib).
 
 ### Prerequisites
 
