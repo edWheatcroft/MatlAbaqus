@@ -33,7 +33,10 @@ def loadMat(filename):
         for key in d:
             if isinstance(d[key], spio.matlab.mio5_params.mat_struct):
                 d[key] = _todict(d[key])
+            elif isinstance(d[key], unicode):     # unicode seems to be implemented differently in python 2
+                d[key] = str(d[key])
         return d
+
 
     def _todict(matobj):
         '''
@@ -46,9 +49,12 @@ def loadMat(filename):
                 d[strg] = _todict(elem)
             elif isinstance(elem, np.ndarray):
                 d[strg] = _tolist(elem)
+            elif isinstance(elem, unicode):     # unicode seems to be implemented differently in python 2
+                d[strg] = str(elem)
             else:
                 d[strg] = elem
         return d
+
 
     def _tolist(ndarray):
         '''
