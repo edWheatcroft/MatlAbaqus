@@ -58,7 +58,7 @@ class abYthonScript:
                 if ' ' in arg:
                     raise ValueError("User arguments cannot contain spaces. Please split arguments accordingly.")
                 
-                cmdString += ' ' + arg
+                cmdString += ' "' + arg + '"'
 
         return cmdString
 

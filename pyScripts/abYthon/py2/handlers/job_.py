@@ -39,11 +39,7 @@ class job:
 
         # make a .bat file to run the job if requested
         if makeBat:
-            self.writeSubmissionBat()
-
-        # make the output directory if it doesn't exist using vintage python syntax
-        if not os.path.exists(self.outDirPath):
-            os.makedirs(self.outDirPath)                               
+            self.writeSubmissionBat()                            
 
         # note where we are and change to the output directory
         currDir = os.getcwd()
@@ -79,6 +75,10 @@ class job:
         os.chdir(self.inpDirPath)
         self.jobJect.writeInput(consistencyChecking=consChecking)
         os.chdir(currDir)
+
+        # make the output directory if it doesn't exist using vintage python syntax
+        if not os.path.exists(self.outDirPath):
+            os.makedirs(self.outDirPath)   
 
 
     def writeSubmissionBat(self):
@@ -137,6 +137,6 @@ class job:
     def remove_readonly(self, func, path, excinfo):
         # func = the function that raised the exception (os.remove, os.rmdir)
         # path = the path it tried to delete
-        # excinfo = exception info
+        # excinfo = exception info (required but unused)
         os.chmod(path, stat.S_IWRITE)  # make writable
         func(path)  # retry
