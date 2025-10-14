@@ -47,24 +47,22 @@ MSGfilePath = fullfile(programFolder, jobName); %[programFolder,'/',jobName,'.ms
 
 
 % Set up the Import Options and import the data
-opts = delimitedTextImportOptions("NumVariables", 1);
+loadOpts = delimitedTextImportOptions("NumVariables", 1);
 
 % Specify range and delimiter
-opts.DataLines = [1, Inf];
-opts.Delimiter = "";
+loadOpts.DataLines = [1, Inf];
+loadOpts.Delimiter = "";
 % Specify column names and types
-opts.VariableNames = "VarName1";
-opts.VariableTypes = "char"; % change to "string" to import as a string array
+loadOpts.VariableNames = "VarName1";
+loadOpts.VariableTypes = "char"; % change to "string" to import as a string array
 % Specify file level properties
-opts.ExtraColumnsRule = "ignore";
-opts.EmptyLineRule = "read";
+loadOpts.ExtraColumnsRule = "ignore";
+loadOpts.EmptyLineRule = "read";
 % Specify variable properties
-opts = setvaropts(opts, "VarName1", "WhitespaceRule", "preserve");
-opts = setvaropts(opts, "VarName1", "EmptyFieldRule", "auto");
+loadOpts = setvaropts(loadOpts, "VarName1", "WhitespaceRule", "preserve");
+loadOpts = setvaropts(loadOpts, "VarName1", "EmptyFieldRule", "auto");
 % Import the data
-msg = readmatrix(MSGfilePath, opts);
-% Clear temporary variables
-clear opts
+msg = readmatrix(MSGfilePath, loadOpts);
 
 
 %% compute and print the number of STEPS in this job (as distinct from increments)       
