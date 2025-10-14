@@ -1,4 +1,4 @@
-function [stepSummary, EVsummary, stabSummary] = readMSG(fileName, filePath, printFlag)
+function [stepSummary, EVsummary, stabSummary] = readMSG(fileName, filePath, printFlag, opts)
 % A function to read the abaqus *.MSG file 'fileName', in the location
 % specified by 'filePath'. The function extracts the
 % number of negative eigenvalues in each increment of the analysis.
@@ -34,6 +34,7 @@ arguments
     fileName char
     filePath char
     printFlag logical = false
+    opts.noWarn = false;
 end
 
 
@@ -113,7 +114,7 @@ for i = 1:numSteps
         end
     end
     if offset ~= 0 && ~printFlag
-        warning(['Some increments in step ',num2str(i),' of job "',fileName ,'" required multiple attempts to achieve convergence. Run with printFlag = true for a summary of which ones.'])
+        warn_(['Some increments in step ',num2str(i),' of job "',fileName ,'" required multiple attempts to achieve convergence. Run with printFlag = true for a summary of which ones.'])
     end
     incStart = realStart;                           % overwrite incStart
     incLog{i,1} = incStart;                         % store the row index of each increment start within each step in incLog
@@ -126,7 +127,7 @@ for i = 1:numSteps
     numIncsStarted = str2double(finalAttemptLine{1}{2});                       % extract the actual increment number as a number
     numIncsFinished = size(incEnd,1);
     if numIncsStarted == numIncsFinished + 1
-        warning(['It is likely that the final increment (increment ',num2str(numIncsStarted),') of step ', num2str(i), ' in job ', fileName, ' did not converge. Therefore the final increment output in the corresponding .dat may be untrustworthy.'])
+        warn_(['It is likely that the final increment (increment ',num2str(numIncsStarted),') of step ', num2str(i), ' in job ', fileName, ' did not converge. Therefore the final increment output in the corresponding .dat may be untrustworthy.'])
     elseif size(incStart,1) ~= size(incEnd,1)
         error(['Something has gone wrong in readMSG(): readMSG thinks that ', num2str(size(incStart,1)), ' increments began, but ', num2str(size(incEnd,1)), ' finished in step ', num2str(i), ' of job ', fileName])
     end
@@ -244,9 +245,17 @@ nonEVwarn = contains(summary,'ANALYSIS WARNINGS ARE NUMERICAL PROBLEM MESSAGES')
 nonEVwarn = regexp(summary(nonEVwarn),'\d*','Match');
 nonEVwarn = str2double(nonEVwarn{1});
 if nonEVwarn ~= 0
-    warning(['There are ', num2str(nonEVwarn) ,' warnings in the MSG file which are NOT for negative eigenvalues'])
+    warn_(['There are ', num2str(nonEVwarn) ,' warnings in the MSG file which are NOT for negative eigenvalues'])
 end
 if printFlag
     disp('%%%%%%%%%% .MSG read complete %%%%%%%%%%')
+end
+
+    function warn_(warnText)
+        if ~opts.noWarn
+            warning(warnText)
+        end
+    end
+
 
 end

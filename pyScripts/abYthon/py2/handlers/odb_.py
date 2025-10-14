@@ -183,6 +183,7 @@ class odb:
         """
         Extracts field output data for a specific variable from a given step in an Abaqus ODB file.
         Can extract either a specific component of a vector/tensor variable or an invariant.
+        Each row of output['data'] corresponds to an analysis frame.
 
         Make sure that the region and frame range you query all contain the same number of values.
         
