@@ -10,12 +10,12 @@ from pathlib import Path
 class abYthonScript:
     def __init__(self, scriptName, caeKernel = False, runDir = Path.cwd()):
         
+        scriptStr = str(scriptName)
         # ensure script name ends with .py
-        if not scriptName.endswith('.py'):
-            scriptName = scriptName + '.py'
+        if not scriptStr.endswith('.py'):
+            scriptStr = scriptStr + '.py'
 
-        
-        self.scriptName = scriptName        
+        self.scriptName = scriptStr
         self.caeKernel = caeKernel
         self.runDir = Path(runDir)          # directory of the script. this is also where it will be run from
 
@@ -28,6 +28,7 @@ class abYthonScript:
 
         # run the script
         print(f'Running script {self.scriptName} in directory {self.runDir}')
+        self.runDir.mkdir(parents=True, exist_ok=True)
         start_time = time.time()
         output = subprocess.run(cmdString, shell=True, cwd=self.runDir, capture_output=True, text=True)
         end_time = time.time()
