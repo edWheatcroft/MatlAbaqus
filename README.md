@@ -4,6 +4,8 @@ A lot of this code isn't written especially well/neatly. Tidying it up is an ong
 
 Currently includes (see individual files for further information):
 - readMSG() - A function to extract negative eigenvalue information from ABAQUS' .msg file.
+- runAbJob() - A function to submit a .inp file from MATLAB.
+- runPyScript() - A function to run an ABAQUS python script from MATLAB
 - pyScripts - A directory containing a python package, abYthon, for interacting with ABAQUS' native python objects.
 
 **This repository is currently under heavy development**
