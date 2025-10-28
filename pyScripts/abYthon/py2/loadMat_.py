@@ -9,14 +9,12 @@ def loadMat(filename):
     which are still mat-objects.
 
     This issue has probably been fixed in the latest version of scipy, but 
-    it's still an issue in ABAQUS' retro version.
+    it's still an issue in ABAQUS' retro python install.
     
-    Matlab double arrays end up as lists. Just send them back to np.array()
-    to fix this.
-    Sililarly, strings and chars seem to end up as unicode, so send them
-    back to str().
+    Strings and string arrays seem to break entirely, so package them in 
+    matlab as chars or cell arrays of chars instead.
 
-    I didn't write this, bar a few tiny modifications, all credit goes to:
+    I didn't write this, bar a few modifications, all credit goes to:
     https://stackoverflow.com/questions/7008608/scipy-io-loadmat-nested-structures-i-e-dictionaries
 
     Parameters
@@ -35,6 +33,8 @@ def loadMat(filename):
                 d[key] = _todict(d[key])
             elif isinstance(d[key], unicode):     # unicode seems to be implemented differently in python 2
                 d[key] = str(d[key])
+            elif isinstance(d[key], np.ndarray):
+                d[key] = _tolist(d[key])
         return d
 
 
@@ -68,9 +68,14 @@ def loadMat(filename):
                 elem_list.append(_todict(sub_elem))
             elif isinstance(sub_elem, np.ndarray):
                 elem_list.append(_tolist(sub_elem))
+            elif isinstance(sub_elem, unicode):     
+                elem_list.append(str(sub_elem))
             else:
                 elem_list.append(sub_elem)
         return elem_list
+    
+    
+    # load the mat file and process it
     data = spio.loadmat(filename, struct_as_record=False, squeeze_me=True)
     return _check_keys(data)
 
