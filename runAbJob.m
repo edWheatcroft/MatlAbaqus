@@ -7,6 +7,7 @@ function [success, msg] = runAbJob(jobName, opts)
         opts.runFrom char = []                      % If specified, the abaqus command is called from this directory
         opts.waitUntilDone (1,1) logical = true     % If specified, funciton won't return until the abaqus command does
         opts.numAttempts int64 = 2                  % The number of times to try submitting the command. Function returns after the first successful run.
+        opts.successFun = @nativeSuccessFun         % handle to a function which will be used to determine whether or not the run was successful.
     end
     
     % set the ask_delete attribute to off if the user didn't specify and silent option is set (so the user isn't asked without their knowledge)
@@ -29,19 +30,19 @@ function [success, msg] = runAbJob(jobName, opts)
     
     % run
     counter = 0;
-    failed = true;
-    while failed && counter < opts.numAttempts 
+    success = false;
+    while ~success && counter < opts.numAttempts 
         if ~opts.silent
             [failed, msg] = system(cmdString,'-echo');
         else
             [failed, msg] = system(cmdString);
         end
+        success = opts.successFun(failed, jobName);
         counter = counter + 1;
     end
-    success = ~failed;
 
     % warn the user if it failed
-    if failed
+    if ~success
         warning(['Abaqus job: ', jobName, ' failed to run after ', num2str(counter), 'attempts'])
     end
     
@@ -75,4 +76,19 @@ function cmdLineArgString = convertCmdLnArgs(argStruct)
     if ~isempty(cmdLineArgString)
         cmdLineArgString = [' ', cmdLineArgString];
     end
+end
+
+function success = nativeSuccessFun(~, jobName)
+    %% function to check whether or not a call to the abaqus command was successful.
+    % returns true if <jobName>.odb exists in the current directory.
+    % first argument intentionally un-used.
+    
+    % get a list of all the files in the current directory (which is where the command is running)
+    fileList = dir(pwd);
+    fileNames = {fileList.name};
+    odbName = [jobName, '.odb'];
+
+    % check if any of them is an .odb file for this job
+    success = any(strcmp(odbName, fileNames),"all");
+    
 end
