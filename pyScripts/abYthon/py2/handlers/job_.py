@@ -88,7 +88,7 @@ class job:
         """
 
         inpRelPath = os.path.join('..', self.inputDirName, self.inpFileName)
-        batPath = os.path.join(self.inpDirPath, 'submitJob.bat')
+        batPath = os.path.join(self.inpDirPath, 'submit_' + self.name + '.bat')
 
 
         bat_contents = [
