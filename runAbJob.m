@@ -9,6 +9,9 @@ function [success, msg] = runAbJob(jobName, opts)
         opts.numAttempts int64 = 2                  % The number of times to try submitting the command. Function returns after the first successful run.
         opts.successFun = @nativeSuccessFun         % handle to a function which will be used to determine whether or not the run was successful.
     end
+    if ~opts.silent && ~opts.waitUntilDone
+        warning('Not waiting until done AND returning output not possible.')
+    end
     
     % set the ask_delete attribute to off if the user didn't specify and silent option is set (so the user isn't asked without their knowledge)
     if ~isfield(opts.cmdLineArgs, 'ask_delete') && opts.silent
