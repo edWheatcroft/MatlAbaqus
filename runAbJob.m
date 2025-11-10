@@ -8,6 +8,7 @@ function [success, msg] = runAbJob(jobName, opts)
         opts.waitUntilDone (1,1) logical = true     % If specified, funciton won't return until the abaqus command does
         opts.numAttempts int64 = 2                  % The number of times to try submitting the command. Function returns after the first successful run.
         opts.successFun = @nativeSuccessFun         % handle to a function which will be used to determine whether or not the run was successful.
+        opts.pingBeforeRun = false                  % set true to ping the license server before trying to run, and only run if we can talk to it
     end
     if ~opts.silent && ~opts.waitUntilDone
         warning('Not waiting until done AND returning output not possible.')
@@ -31,6 +32,27 @@ function [success, msg] = runAbJob(jobName, opts)
         cd(opts.runFrom)
     end
     
+    % don't proceed unless we can talk to the license server
+    if opts.pingBeforeRun
+        cantFindServer = false;
+    else
+        cantFindServer = true;
+    end
+    printErval = 60;
+    counter = 1;
+    tic
+    while cantFindServer
+        foundServer = hanEx.pingServer('abaqus');
+        cantFindServer = ~foundServer;
+        delay = toc;
+        if delay > printErval
+            totalDelay = sprintf('%.0f', counter*printErval);
+            disp(['Waiting for ABAQUS Server for ', totalDelay, ' secs...'])
+            counter = counter + 1;
+            tic
+        end
+    end
+
     % run
     counter = 0;
     success = false;

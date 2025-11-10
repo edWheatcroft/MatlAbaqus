@@ -1,13 +1,14 @@
 function [success, msg] = runPyScript(pathToScript, caeKernel, opts)
     %% function to run an Abaqus python script from MATLAB
     arguments
-        pathToScript char                   % The path to the script you are running from opts.runFrom. If opts.runFrom is not specified, pathToScript is the path to the script from wherever you called the present function.
-        caeKernel (1,1) logical = true      % set true if script requires cae modules. false otherwise. true is safe if you are unsure.
-        opts.silent = false                 % true to suppress all command line output
-        opts.runFrom = []                   % specify a path here to run the script from a particular directory
-        opts.userArgs struct = []           % Struct specifying any arguments you wish to pass to your script using sys.argv (see below helper)
-        opts.numAttempts int64 = 2          % Number of times the function tried to execute the script.
-        opts.successFun = @nativeSuccessFun % handle to a function which will be used to determine whether or not the run was successful.
+        pathToScript char                       % The path to the script you are running from opts.runFrom. If opts.runFrom is not specified, pathToScript is the path to the script from wherever you called the present function.
+        caeKernel (1,1) logical = true          % set true if script requires cae modules. false otherwise. true is safe if you are unsure.
+        opts.silent = false                     % true to suppress all command line output
+        opts.runFrom = []                       % specify a path here to run the script from a particular directory
+        opts.userArgs struct = []               % Struct specifying any arguments you wish to pass to your script using sys.argv (see below helper)
+        opts.numAttempts int64 = 2              % Number of times the function tried to execute the script.
+        opts.successFun = @nativeSuccessFun     % handle to a function which will be used to determine whether or not the run was successful.
+        opts.pingBeforeRun = false              % set true to ping the license server before trying to run, and only run if we can talk to it
     end
 
     % build the basic command
@@ -32,6 +33,28 @@ function [success, msg] = runPyScript(pathToScript, caeKernel, opts)
         currDir = pwd;
         cd(opts.runFrom)
     end
+
+    % don't proceed unless we can talk to the license server
+    if opts.pingBeforeRun
+        cantFindServer = false;
+    else
+        cantFindServer = true;
+    end
+    printErval = 60;
+    counter = 1;
+    tic
+    while cantFindServer
+        foundServer = hanEx.pingServer('abaqus');
+        cantFindServer = ~foundServer;
+        delay = toc;
+        if delay > printErval
+            totalDelay = sprintf('%.0f', counter*printErval);
+            disp(['Waiting for ABAQUS Server for ', totalDelay, ' secs...'])
+            counter = counter + 1;
+            tic
+        end
+    end
+
 
     % run
     counter = 0;
