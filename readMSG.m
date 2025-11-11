@@ -1,4 +1,4 @@
-function [stepSummary, EVsummary, stabSummary] = readMSG(fileName, filePath, printFlag, opts)
+function [stepSummary, EVsummary, stabSummary, lastStepMaybeUnconverged] = readMSG(fileName, filePath, printFlag, opts)
 % A function to read the abaqus *.MSG file 'fileName', in the location
 % specified by 'filePath'. The function extracts the
 % number of negative eigenvalues in each increment of the analysis.
@@ -36,8 +36,7 @@ arguments
     printFlag logical = false
     opts.noWarn = false;
 end
-
-
+lastStepMaybeUnconverged = false;
 
 %% import the data from the .MSG
 
@@ -100,7 +99,7 @@ for i = 1:numSteps
     offset = 0; 
     for j = 1:size(incEnd,1)                                            % loop over all the increments
         incText = stepText(incStart(j+offset):incEnd(j));                   % pull the text for that increment (ignore the offset for now..)
-        att = find(contains(incText,'ATTEMPT'));                            % pull the 'attempts'
+        att = find(contains(incText,'ATTEMPT '));                            % pull the 'attempts'
         if size(att,1) > 1                                                  % if we needed more than one attempt for this increment...
             realStart(j) = att(end) - 1 + incStart(j+offset);                   % ...then the real starting index of the increment should be the start of the final attempt. we need the -1 to avoid counting the start of the increment twice. The +incStart(... puts us back into the 'reference frame' of the step rather than just the increment
             offset = offset + size(att,1) - 1;                                  % increase the offset so next time we index into incStart we skip over the un-converged attempts
@@ -125,6 +124,7 @@ for i = 1:numSteps
     numIncsStarted = str2double(finalAttemptLine{1}{2});                       % extract the actual increment number as a number
     numIncsFinished = size(incEnd,1);
     if numIncsStarted == numIncsFinished + 1
+        lastStepMaybeUnconverged = true;
         warn_(['It is likely that the final increment (increment ',num2str(numIncsStarted),') of step ', num2str(i), ' in job ', fileName, ' did not converge. Therefore the final increment output in the corresponding .dat may be untrustworthy.'])
     elseif size(incStart,1) ~= size(incEnd,1)
         error(['Something has gone wrong in readMSG(): readMSG thinks that ', num2str(size(incStart,1)), ' increments began, but ', num2str(size(incEnd,1)), ' finished in step ', num2str(i), ' of job ', fileName])
@@ -236,7 +236,7 @@ if sumWarn ~= sum(warnLog)
     disp('*****WARNING:******')
     disp(['Warnings read by this function = ', num2str(sum(warnLog))])
     disp(['Warnings in MSG summary = ', num2str(sumWarn)])
-    warning(['The number of warnings read by readMSG does not equal the total printed in the MSG file summary on line ', num2str(fileEnd),'.',newline,'If this job is a restart analysis then this might not be a problem, because the ABAQUS is counting all the warnings in the original job which are not printed here.'])
+    warning(['The number of warnings read by readMSG() does not equal the total printed in the MSG file summary on line ', num2str(fileEnd),'.',newline,'If this job is a restart analysis then this might not be a problem, because the ABAQUS is counting all the warnings in the original job which are not printed here.'])
 end
 % warn if there are warnings for stuff other than negative EVs
 nonEVwarn = contains(summary,'ANALYSIS WARNINGS ARE NUMERICAL PROBLEM MESSAGES');
