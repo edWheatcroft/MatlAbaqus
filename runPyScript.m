@@ -8,7 +8,7 @@ function [success, msg] = runPyScript(pathToScript, caeKernel, opts)
         opts.userArgs struct = []               % Struct specifying any arguments you wish to pass to your script using sys.argv (see below helper)
         opts.numAttempts int64 = 2              % Number of times the function tried to execute the script.
         opts.successFun = @nativeSuccessFun     % handle to a function which will be used to determine whether or not the run was successful.
-        opts.pingBeforeRun = false              % set true to ping the license server before trying to run, and only run if we can talk to it
+        opts.pingBeforeRun = true               % set true to ping the license server before trying to run, and only run if we can talk to it
     end
 
     % build the basic command
@@ -36,15 +36,21 @@ function [success, msg] = runPyScript(pathToScript, caeKernel, opts)
 
     % don't proceed unless we can talk to the license server
     if opts.pingBeforeRun
-        cantFindServer = false;
-    else
         cantFindServer = true;
+    else
+        cantFindServer = false;
     end
     printErval = 60;
     counter = 1;
     tic
     while cantFindServer
-        foundServer = hanEx.pingServer('abaqus');
+        [cmdFail, msg] = system('abaqus licensing dslsstat');
+        if cmdFail || contains(msg, 'error', 'ignorecase', true)
+            foundServer = false;
+            pause(60)           % the connection error normally sorts itself out on about this timescale, and we probably don't want to spam the dslsstat utility too hard
+        else
+            foundServer = true;
+        end
         cantFindServer = ~foundServer;
         delay = toc;
         if delay > printErval

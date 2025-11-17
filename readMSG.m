@@ -232,11 +232,11 @@ if sumIncs ~= sumIncs && sumIncs ~= incsRead + 1
 end
 % if the summary and what we calculated disagree, AND if the final increment DIDN'T fail (because the abaqus summary counts this as an increment but we don't) then break
 if sumWarn ~= sum(warnLog)
-    disp('%')
-    disp('*****WARNING:******')
-    disp(['Warnings read by this function = ', num2str(sum(warnLog))])
-    disp(['Warnings in MSG summary = ', num2str(sumWarn)])
-    warning(['The number of warnings read by readMSG() does not equal the total printed in the MSG file summary on line ', num2str(fileEnd),'.',newline,'If this job is a restart analysis then this might not be a problem, because the ABAQUS is counting all the warnings in the original job which are not printed here.'])
+    warn_('%')
+    warn_('*****WARNING:******')
+    warn_(['Warnings read by this function = ', num2str(sum(warnLog))])
+    warn_(['Warnings in MSG summary = ', num2str(sumWarn)])
+    warn_(['The number of warnings read by readMSG() does not equal the total printed in the MSG file summary on line ', num2str(fileEnd),'.',newline,'If this job is a restart analysis then this might not be a problem, because the ABAQUS is counting all the warnings in the original job which are not printed here.'])
 end
 % warn if there are warnings for stuff other than negative EVs
 nonEVwarn = contains(summary,'ANALYSIS WARNINGS ARE NUMERICAL PROBLEM MESSAGES');
