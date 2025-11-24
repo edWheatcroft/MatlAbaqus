@@ -56,9 +56,6 @@ class abYthonScript:
                 if not isinstance(arg, str):
                     raise ValueError("All user arguments must be strings.")
                 
-                if ' ' in arg:
-                    raise ValueError("User arguments cannot contain spaces. Please split arguments accordingly.")
-                
                 cmdString += ' "' + arg + '"'
 
         return cmdString

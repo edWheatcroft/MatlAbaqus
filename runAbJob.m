@@ -53,7 +53,7 @@ function [success, msg] = runAbJob(jobName, opts)
         delay = toc;
         if delay > printErval
             totalDelay = sprintf('%.0f', counter*printErval);
-            disp(['Waiting for ABAQUS Server for ', totalDelay, ' secs...'])
+            disp([char(datetime('now','format','dd-MM-yy_HH-mm-ss')), ': Compute job waiting for ABAQUS Server for ', totalDelay, ' secs...'])
             counter = counter + 1;
             tic
         end
