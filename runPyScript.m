@@ -6,8 +6,8 @@ function [success, msg] = runPyScript(pathToScript, caeKernel, opts)
         opts.silent = false                     % true to suppress all command line output
         opts.runFrom = []                       % specify a path here to run the script from a particular directory
         opts.userArgs struct = []               % Struct specifying any arguments you wish to pass to your script using sys.argv (see below helper)
-        opts.numAttempts int64 = 2              % Number of times the function tried to execute the script.
-        opts.successFun = @nativeSuccessFun     % handle to a function which will be used to determine whether or not the run was successful.
+        opts.numAttempts int64 = 1              % Number of times the function tried to execute the script.
+        opts.successFun = @nativeSuccessFun     % handle to a function which will be used to determine whether or not the run was successful. See end of this file for inputs, outputs etc.
         opts.pingBeforeRun = true               % set true to ping the license server before trying to run, and only run if we can talk to it
     end
 
@@ -71,7 +71,7 @@ function [success, msg] = runPyScript(pathToScript, caeKernel, opts)
         else
             [failed, msg] = system(cmdString);
         end
-        success = opts.successFun(failed, pathToScript);
+        success = opts.successFun(failed, msg, pathToScript);
         counter = counter + 1;
     end
 
@@ -112,7 +112,7 @@ function userArgString = convertUserArgs(userArgs)
 
 end
 
-function success = nativeSuccessFun(systemOut, ~)
+function success = nativeSuccessFun(systemOut, ~, ~)
     %% default function to determine whether or not the call to abaqus command was successful.
     % second argument is intentionally un-used. The idea is that the user's own success function might need to utilise
     % pathToScript

@@ -6,7 +6,7 @@ function [success, msg] = runAbJob(jobName, opts)
         opts.cmdLineArgs struct = struct.empty      % A struct specifying command line arguments to send to the Abaqus kernel (see helper funciton below)
         opts.runFrom char = []                      % If specified, the abaqus command is called from this directory
         opts.waitUntilDone (1,1) logical = true     % If specified, funciton won't return until the abaqus command does
-        opts.numAttempts int64 = 2                  % The number of times to try submitting the command. Function returns after the first successful run.
+        opts.numAttempts int64 = 1                  % The number of times to try submitting the command. Function returns after the first successful run.
         opts.successFun = @nativeSuccessFun         % handle to a function which will be used to determine whether or not the run was successful.
         opts.pingBeforeRun = true                   % set true to ping the license server before trying to run, and only run if we can talk to it
     end
