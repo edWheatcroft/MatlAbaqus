@@ -1,0 +1,121 @@
+function [success, msg] = runPyScript(pathToScript, caeKernel, opts)
+    %% function to run an Abaqus python script from MATLAB
+    arguments
+        pathToScript char                       % The path to the script you are running from opts.runFrom. If opts.runFrom is not specified, pathToScript is the path to the script from wherever you called the present function.
+        caeKernel (1,1) logical = true          % set true if script requires cae modules. false otherwise. true is safe if you are unsure.
+        opts.silent = false                     % true to suppress all command line output
+        opts.runFrom = []                       % specify a path here to run the script from a particular directory
+        opts.userArgs struct = []               % Struct specifying any arguments you wish to pass to your script using sys.argv (see below helper)
+        opts.numAttempts int64 = 1              % Number of times the function tried to execute the script.
+        opts.successFun = @nativeSuccessFun     % handle to a function which will be used to determine whether or not the run was successful. See end of this file for inputs, outputs etc.
+        opts.pingBeforeRun = true               % set true to ping the license server before trying to run, and only run if we can talk to it
+    end
+
+    % build the basic command
+    if caeKernel
+        cmdString = 'abaqus cae noGUI=';
+    else
+        cmdString = 'abaqus python ';
+    end
+
+    % construct the additional argument string
+    userArgString = convertUserArgs(opts.userArgs);
+
+    % construct the final command string
+    cmdString = [cmdString, pathToScript, userArgString];
+    if caeKernel && opts.silent
+        % cmdString = [cmdString, ' > NUL 2>&1'];
+        cmdString = [cmdString, ' 1>NUL 2>NUL'];
+    end
+    
+    % change to opts.runFrom is specified..
+    if ~isempty(opts.runFrom)
+        currDir = pwd;
+        cd(opts.runFrom)
+    end
+
+    % don't proceed unless we can talk to the license server
+    if opts.pingBeforeRun
+        cantFindServer = true;
+    else
+        cantFindServer = false;
+    end
+    printErval = 60;
+    counter = 1;
+    tic
+    while cantFindServer
+        [cmdFail, msg] = system('abaqus licensing dslsstat');
+        if cmdFail || contains(msg, 'error', 'ignorecase', true)
+            foundServer = false;
+            pause(60)           % the connection error normally sorts itself out on about this timescale, and we probably don't want to spam the dslsstat utility too hard
+        else
+            foundServer = true;
+        end
+        cantFindServer = ~foundServer;
+        delay = toc;
+        if delay > printErval
+            totalDelay = sprintf('%.0f', counter*printErval);
+            disp([char(datetime('now','format','dd-MM-yy_HH-mm-ss')), ': CAE job waiting for ABAQUS Server for ', totalDelay, ' secs...'])
+            counter = counter + 1;
+            tic
+        end
+    end
+
+
+    % run
+    counter = 0;
+    success = false;
+    while ~success && counter < opts.numAttempts 
+        if ~opts.silent
+            [failed, msg] = system(cmdString,'-echo');
+        else
+            [failed, msg] = system(cmdString);
+        end
+        success = opts.successFun(failed, msg, pathToScript);
+        counter = counter + 1;
+    end
+
+    % warn the user if it failed
+    if ~success
+        warning(['Abaqus python script ', pathToScript, ' failed to run after ', num2str(counter), 'attempts'])
+    end
+
+    % change back to home
+    if ~isempty(opts.runFrom)
+        cd(currDir)
+    end
+
+end
+
+function userArgString = convertUserArgs(userArgs)
+    %% helper to convert the userArgs argument into the right format to send to an Abaqus python script
+    % Output arguments will be in the same order as the fields of userArgs, which is the order in which they were
+    % created
+    arguments
+        userArgs struct % struct specifying the user arguments. Struct fields must be strings or convertable using string().
+                        % Fieldnames are not used by this function.
+    end
+    
+    userArgString = [];
+    
+    % loop over the fields of userArgs...
+    fNames = fieldnames(userArgs);
+    for name = fNames'
+        % ...and correctly format the argument
+        newArg = ['"', char(string(userArgs.(name{1}))),'"'];
+        userArgString = [userArgString, ' ', newArg];
+    end
+    
+    if ~isempty(userArgString)
+        userArgString = [' --',userArgString];
+    end
+
+end
+
+function success = nativeSuccessFun(systemOut, ~, ~)
+    %% default function to determine whether or not the call to abaqus command was successful.
+    % second argument is intentionally un-used. The idea is that the user's own success function might need to utilise
+    % pathToScript
+
+    success = ~systemOut;
+end
