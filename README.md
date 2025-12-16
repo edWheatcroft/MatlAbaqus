@@ -18,10 +18,10 @@ Currently includes (see individual files for further information):
 - Either clone or download the repository.
 - Add the repository's folder to the MATLAB path. You can now access the mtlbAqs package in MATLAB using "mtlbAqs.<functionName>"
 - Install the abYthon package to YOUR OWN python install using pip.
-- If you want to access abYthon.py2 directly from within ABAQUS python, either add its path in the script you are running, or copy the py2 folder to ABQAQUS' lib directory (on Windows, this is somewhere like C:\SIMULIA\EstProducts\2023\win_b64\tools\SMApy\python2.7\lib\site-packages).
+- odbQuery requires access to abYthon.py2 directly from within ABAQUS python. To set enable this, copy the py2 folder to ABQAQUS' lib directory (on Windows, this is somewhere like C:\SIMULIA\EstProducts\20XX\win_b64\tools\SMApy\python2.7\lib\site-packages).
 
 ### Prerequisites
 
-This product was developed in MATLAB 2024b and earlier.
+This repository was developed in ABAQUS 2023, and MATLAB 2024b and earlier.
 
 
