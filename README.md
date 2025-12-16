@@ -8,7 +8,7 @@ Currently includes (see individual files for further information):
     - readSTA() - A function to extract step and incrementation information from ABAQUS' .STA file.
     - runAbJob() - A function to submit a .inp file from MATLAB.
     - runPyScript() - A function to run an ABAQUS python script from MATLAB.
-    - odbQuery() - A class defining a query to an ABAQUS output database (.odb file). Use this to read data from .odb files into MATLAB
+    - odbQuery() - A class defining a query to an ABAQUS output database (.odb file). Use this to read data from .odb files into MATLAB. This is a bit slow at the moment, I'll try to speed it up at some stage...
 - pyScripts - A directory containing a python package, abYthon, for interacting with ABAQUS' native Python objects.
 
 **This repository is currently under heavy development**
