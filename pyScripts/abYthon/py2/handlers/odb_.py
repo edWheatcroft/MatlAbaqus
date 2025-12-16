@@ -235,12 +235,10 @@ class odb:
             raise ValueError("Must specify either a component or an invariant")
         # ... and set up something handy for the output dict
         if component is not None:
-            comInvarName = 'component'
-            comInvarVal = variableName + str(component),
+            compVariant = str(component)
         else:
-            comInvarName = 'invariant'
-            comInvarVal = invariant
-
+            compVariant = invariant
+    
 
         # work out which frames to extract
         if frames is None:
@@ -252,12 +250,55 @@ class odb:
 
 
         # set some stuff up for the loops
-        numVals = len(self.odb.steps[stepName].frames[frameIDs[0]].fieldOutputs[variableName].values)
+        if region is None:
+            sampleFrameValues = self.odb.steps[stepName].frames[frameIDs[0]].fieldOutputs[variableName].values
+        else:
+            sampleFrameValues = self.odb.steps[stepName].frames[frameIDs[0]].fieldOutputs[variableName].getSubset(region=region).values
+        sampleFrameValue = sampleFrameValues[0]
+        if sampleFrameValue.sectionPoint is None:
+            spFlag = False
+        else:
+            spFlag = True
+        
+        numVals = len(sampleFrameValues)
         valIDs = range(numVals)                     # compute here once to speed up the loop
         time = np.zeros(numFrames)                  # preallocate time array
         time[:] = np.nan                            # set to nan so we can see if we miss any
         out = np.zeros((numFrames, numVals))        # preallocate output array
         out[:,:] = np.nan
+
+        # preallocate arrays to hold location about the values
+        nodeIDs = np.zeros(numVals)
+        nodeIDs[:] = np.nan
+        elIDs = np.zeros(numVals)
+        elIDs[:] = np.nan
+        intPts = np.zeros(numVals)
+        intPts[:] = np.nan
+        faceIDs = np.zeros(numVals)
+        faceIDs[:] = np.nan
+        sectionPoints = np.zeros(numVals)
+        sectionPoints[:] = np.nan
+        positions = []
+        # populate the location arrays from the sample frame
+        for valID in valIDs:
+            valObj = sampleFrameValues[valID]
+            nodeIDs[valID] = valObj.nodeLabel
+            elIDs[valID] = valObj.elementLabel
+            intPts[valID] = valObj.integrationPoint
+            faceIDs[valID] = valObj.face
+            if spFlag:
+                # the section point object also comes with another attribute - 'description'. You might want to add this in here later.
+                sectionPoints[valID] = valObj.sectionPoint.number
+            if valObj.position == NODAL:
+                positions.append('NODAL')
+            elif valObj.position == INTEGRATION_POINT:
+                positions.append('INTEGRATION_POINT')
+            elif valObj.position == ELEMENT_NODAL:
+                positions.append('ELEMENT_NODAL')
+            elif valObj.position == ELEMENT_FACE:
+                positions.append('ELEMENT_FACE')
+            elif valObj.position == CENTROID:
+                positions.append('CENTROID')
 
         # you can't slice abaqus frame/value objects, so unfortunately we have to loop through them, which is slow
         # loop over the frames...
@@ -279,14 +320,24 @@ class odb:
                 if component is not None:
                     out[frameID, valID] = valObj.data[component-1]      # .data is a numpy array
                 else:
-                    out[frameID, valID] = getattr(valObj, invariant)    # e.g. valObj.mises
+                    try:
+                        out[frameID, valID] = getattr(valObj, invariant)    # e.g. valObj.mises
+                    except AttributeError:
+                        raise ValueError("Invariant '{}' not found for variable '{}'. Make sure you've formatted the name in camelCase.".format(invariant, variableName))
         
         
         output = {
             'time': time,               # I've keyed this as 'time', but really it's arc length if this is a Riks step
             'data': out,
             'variable': variableName,
-            comInvarName: comInvarVal
+            'compVariant': compVariant,
+            'dataName': variableName + compVariant,
+            'positions': positions,
+            'nodeIDs': nodeIDs,
+            'elIDs': elIDs,
+            'integrationPoints': intPts,
+            'faceIDs': faceIDs,
+            'sectionPoints': sectionPoints
         }
 
         return output
@@ -349,5 +400,54 @@ class odb:
             return output
         else:
             raise ValueError("The specified step '{}' is not a Riks step or does not contain LPFs.".format(stepName))
-        
-        
+                  
+    def getRegionFromSet(self, setName, instanceName=None):
+            """
+            Retrieves an Abaqus odb.Region object corresponding to a specified node set or element set name.
+
+            Parameters
+            ----------
+            setName : str
+                The name of the node set or element set to retrieve.
+
+            Returns
+            -------
+            odb.Region
+                The Abaqus odb.Region object corresponding to the specified set.
+
+            Raises
+            ------
+            ValueError
+                If the specified set does not exist in the ODB file.
+            """
+            odb_ = self.odb
+            if not instanceName:
+                try:
+                    region = odb_.rootAssembly.nodeSets[setName.upper()]
+                    return region
+                except KeyError:
+                    pass  # Not a node set, try element sets
+
+                try:
+                    region = odb_.rootAssembly.elementSets[setName.upper()]
+                    return region
+                except KeyError:
+                    raise ValueError("Set '{}' not an element or node set.".format(setName))
+                
+            else:
+                try:
+                    instance = odb_.rootAssembly.instances[instanceName.upper()]
+                except KeyError:
+                    raise ValueError("Instance '{}' not found in the output database.".format(instanceName))
+                
+                try:
+                    region = instance.nodeSets[setName.upper()]
+                    return region
+                except KeyError:
+                    pass  # Not a node set, try element sets
+
+                try:
+                    region = instance.elementSets[setName.upper()]
+                    return region
+                except KeyError:
+                    raise ValueError("Set '{}' not an element or node set in instance '{}'.".format(setName, instanceName))
