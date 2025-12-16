@@ -8,8 +8,8 @@ import os
 
 def queryODB(inputPath):
     # set up logging (left here in case you want to debug this in future)
-    scriptName = 'queryODBLogs'
-    logToFile(logFileName=scriptName, logDir=os.getcwd())
+    #scriptName = 'queryODBLogs'
+    #logToFile(logFileName=scriptName, logDir=os.getcwd())
     
     # load the input data
     inpData = loadMat(inputPath)
