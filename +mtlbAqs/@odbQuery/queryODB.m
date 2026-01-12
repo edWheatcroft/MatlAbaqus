@@ -1,5 +1,6 @@
 function [output, success, msg] = queryODB(odbName, odbDir, queries, opts)
-%% function to query an ODB file. The steps, sets and data to query are set by queries
+%% function to query an ODB file. The steps, sets and data to query are set by queries.
+% Note that this function will complain if a .lck file laready exists for the named .odb file.
 arguments
     odbName char
     odbDir char
@@ -46,7 +47,9 @@ save(inPath, '-STRUCT', "inpData")
 % the python command is mega simple, so we can just hard code it here
 pyCommand = strcat('-c "from py2 import queryODB; ', ...
             " queryODB(", "r'", inPath, "')", '"');
-userSuccessFun = @(~, msg, ~) isempty(msg);     % we should see nothing at the command line if the script is successful, otherwise we'll get the error
+userSuccessFun = @(~, msg, ~) isempty(msg);     % we should see nothing at the command line if the script is successful, otherwise we'll get the error.
+                                                % NOTE: this will complain if abaqus prints any warnings and tell us the run
+                                                % failed when it may not have.
 
 % if there's a file already then ask the user if we should create a new one
 if exist(outPath,'file')
@@ -77,6 +80,9 @@ if runFlag
     delete(inPath)
     disp(['Time taken to query ODB: ', num2str(toc(timer), 2), 's'])
 else
+    if exist(inPath,"file")
+        delete(inPath)
+    end
     success = true;
     msg = '';
 end

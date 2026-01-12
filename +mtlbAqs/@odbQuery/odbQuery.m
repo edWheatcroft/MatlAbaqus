@@ -18,9 +18,6 @@ classdef odbQuery < handle
         positions
         integrationPoints
         elIDs
-        % bit of a bodge - a cell of all the data fields we're going to read from python. This helps us read them all in
-        % localUpdateFromStruct
-        readNames = {'time', 'data', 'nodeIDs', 'faceIDs', 'sectionPoints', 'positions', 'integrationPoints', 'elIDs'}
 
     end
     properties (Dependent)
@@ -32,6 +29,9 @@ classdef odbQuery < handle
         pyInpSuffix = '_pyInput.mat'
         pyOutSuffix = '_pyOutput.mat'
         outDataFieldName = 'outputData'
+        % bit of a bodge - a cell of all the data fields labelled as 'output properties' above, which are what we're going to
+        % read from python as dictionary keys. This helps us read them all in localUpdateFromStruct
+        readNames = {'time', 'data', 'nodeIDs', 'faceIDs', 'sectionPoints', 'positions', 'integrationPoints', 'elIDs'}
     end
 
     methods
@@ -143,7 +143,7 @@ classdef odbQuery < handle
     end
     
     methods (Static)
-        [output, success, msg] = queryODB(obj, odbName, odbDir, queries, opts)
+        [output, success, msg] = queryODB(odbName, odbDir, queries, opts)
     end
 
 end
