@@ -8,11 +8,12 @@ Currently includes (see individual files for further information):
     - readSTA() - A function to extract step and incrementation information from ABAQUS' .STA file.
     - runAbJob() - A function to submit a .inp file from MATLAB.
     - runPyScript() - A function to run an ABAQUS python script from MATLAB.
-    - odbQuery() - A class defining a query to an ABAQUS output database (.odb file). Use this to read data from .odb files into MATLAB. This is a bit slow at the moment, I'll try to speed it up at some stage...
+    - odbQuery() - A class defining a query to an ABAQUS output database (.odb file). Use this to read data from .odb files into MATLAB with zero alteration/pre-processing required at the ABAQUS end. This is a bit slow at the moment, I'll try to speed it up at some stage...
 - pyScripts - A directory containing a python package, abYthon, for interacting with ABAQUS' native Python objects.
 
-You may also wish to make use of the excellent web app: Abaqus MSG file analyzer, written by Carl Osterwisch: https://msgfile.info/
-This plots and tabulates a number of useful outputs from the MSG.
+This codebase is by no means the only, and certainly not the best, option out there for post-processing ABAQUS files. I created these scripts merely to meet my own specific needs over the years. I've put them here in the hope that others also find them useful! 
+You may also wish to make use of the excellent web app: Abaqus MSG file analyzer, written by Carl Osterwisch: https://msgfile.info/.
+The app plots and tabulates a number of useful outputs from the MSG file. Some of these can be obtained using readSTA(), although Carl's app is much more nicely presented, and also helps locate problem areas of your mesh.
 
 **This repository is currently under heavy development**
 
