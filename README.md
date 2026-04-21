@@ -11,6 +11,9 @@ Currently includes (see individual files for further information):
     - odbQuery() - A class defining a query to an ABAQUS output database (.odb file). Use this to read data from .odb files into MATLAB. This is a bit slow at the moment, I'll try to speed it up at some stage...
 - pyScripts - A directory containing a python package, abYthon, for interacting with ABAQUS' native Python objects.
 
+You may also wish to make use of the excellent web app: Abaqus MSG file analyzer, written by Carl Osterwisch: https://msgfile.info/
+This plots and tabulates a number of useful outputs from the MSG.
+
 **This repository is currently under heavy development**
 
 ## Getting Started
