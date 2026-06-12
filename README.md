@@ -22,7 +22,7 @@ The app plots and tabulates a number of useful outputs from the MSG file. Some o
 - Either clone or download the repository.
 - Add the repository's folder to the MATLAB path. You can now access the mtlbAqs package in MATLAB using "mtlbAqs.functionName"
 - Install the abYthon package to YOUR OWN python install using pip.
-- odbQuery() requires access to abYthon.py2 directly from within ABAQUS python. To set enable this, copy the py2 folder from this repository (pyScripts/abYthon/py2) to your own ABAQUS installation's python lib directory (on Windows, this is somewhere like C:\SIMULIA\EstProducts\20XX\win_b64\tools\SMApy\python2.7\lib\site-packages).
+- odbQuery() requires access to abYthon.py2 directly from within ABAQUS python. To set enable this, copy the py2 folder from this repository (pyScripts/abYthon/py2) to your own ABAQUS installation's python lib directory (on Windows, this is somewhere like C:\SIMULIA\EstProducts\20XX\win_b64\tools\SMApy\python2.7\lib\site-packages). If using ABAQUS 2024 or later, see the note on compatibility in pyScripts/README.md
 
 ### Prerequisites
 
